@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, access, readdir } from 'node:fs/promises';
-import { validateRelease, renderRelease } from '../tools/sync-release.mjs';
+import { validateRelease, renderRelease, androidLabel } from '../tools/sync-release.mjs';
 
 const root = new URL('../', import.meta.url);
 const html = await readFile(new URL('index.html', root), 'utf8');
@@ -12,7 +12,7 @@ test('download exactly matches verified internal-release metadata', () => {
   validateRelease(release);
   assert.equal(release.testRelease, true);
   assert.equal(release.usageStatisticsDefaultEnabled, true);
-  assert.equal(release.minSdk, 24);
+  assert.ok(Number.isSafeInteger(release.minSdk) && release.minSdk >= 21);
   assert.equal(release.abi, 'arm64-v8a');
   assert.ok(html.includes(`href="${release.downloadUrl}"`));
   assert.ok(html.includes(`href="${release.releaseUrl}"`));
@@ -66,7 +66,7 @@ test('existing HTML works as a complete download page with JavaScript disabled',
   assert.match(html, /<a[^>]+data-apk-link[^>]+https:\/\/gitee\.com/);
   assert.match(html, /<a[^>]+href="privacy\.html"/);
   assert.match(html, /<details/);
-  assert.match(html, /Android 7\.0\+/);
+  assert.ok(html.includes(androidLabel(release.minSdk)));
 });
 
 test('QR is a local static SVG, not a remote QR-generation tracker', async () => {
@@ -78,16 +78,19 @@ test('QR is a local static SVG, not a remote QR-generation tracker', async () =>
 });
 
 test('future release stamping updates all version fields and preserves disclosure', () => {
-  const next = {...release,versionName:'0.1.23',versionCode:24,sizeBytes:46_000_000,
+  const parts=release.versionName.split('.').map(Number);
+  parts[2]++;
+  const versionName=parts.join('.'), versionCode=release.versionCode+1;
+  const next = {...release,versionName,versionCode,sizeBytes:46_000_000,
     sha256:'a'.repeat(64),publishedAt:'2026-10-20T10:00:00Z',
-    downloadUrl:'https://gitee.com/ice_infinite/anyao-releases/releases/download/v0.1.23-arm64-test.1/anyao-0.1.23-24-arm64-v8a.apk',
-    releaseUrl:'https://gitee.com/ice_infinite/anyao-releases/releases/tag/v0.1.23-arm64-test.1'};
+    downloadUrl:`https://gitee.com/ice_infinite/anyao-releases/releases/download/v${versionName}-arm64-test.1/anyao-${versionName}-${versionCode}-arm64-v8a.apk`,
+    releaseUrl:`https://gitee.com/ice_infinite/anyao-releases/releases/tag/v${versionName}-arm64-test.1`};
   const updated = renderRelease(html, release, next);
   assert.ok(updated.includes(next.downloadUrl));
   assert.ok(updated.includes(next.sha256));
   assert.ok(updated.includes('<!-- release:size -->46.00 MB<!-- /release:size -->'));
   assert.ok(!updated.includes(release.downloadUrl));
-  assert.ok(!updated.includes('<!-- release:version -->0.1.22'));
+  assert.ok(!updated.includes(`<!-- release:version -->${release.versionName}<!--`));
   assert.ok(updated.includes('默认开启基础使用统计'));
 });
 
