@@ -1,0 +1,108 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile, access, readdir } from 'node:fs/promises';
+import { validateRelease, renderRelease } from '../tools/sync-release.mjs';
+
+const root = new URL('../', import.meta.url);
+const html = await readFile(new URL('index.html', root), 'utf8');
+const privacy = await readFile(new URL('privacy.html', root), 'utf8');
+const release = JSON.parse(await readFile(new URL('assets/release.json', root), 'utf8'));
+
+test('download exactly matches verified internal-release metadata', () => {
+  validateRelease(release);
+  assert.equal(release.testRelease, true);
+  assert.equal(release.usageStatisticsDefaultEnabled, true);
+  assert.equal(release.minSdk, 24);
+  assert.equal(release.abi, 'arm64-v8a');
+  assert.ok(html.includes(`href="${release.downloadUrl}"`));
+  assert.ok(html.includes(`href="${release.releaseUrl}"`));
+  assert.ok(html.includes(release.sha256));
+  assert.ok(html.includes(`<!-- release:code -->${release.versionCode}<!-- /release:code -->`));
+});
+
+test('no runtime framework, cloud API, telemetry or external scripts', () => {
+  assert.match(html, /connect-src 'none'/);
+  assert.match(html, /script-src 'self'/);
+  assert.ok(!html.includes('onclick='));
+  assert.ok(!html.includes('nip.io'));
+  for (const script of html.matchAll(/<script[^>]+src="([^"]+)"/g)) assert.ok(script[1].startsWith('assets/'));
+  assert.ok(!/https?:\/\/[^"\s]+\.(?:js|css)(?:["\s])/i.test(html));
+});
+
+test('honest capabilities, explicit internal collection default and no medical promise', () => {
+  for (const text of ['测试签名','不是正式版','默认开启基础使用统计','演示数据','不提供诊断或用药建议','尚未完成或销售','暂时隐藏']) assert.ok(html.includes(text), text);
+  for (const text of ['90天','7天','不等于精准使用人数','默认开启','允许基础使用统计','本机','云同步']) assert.ok(privacy.includes(text), text);
+});
+
+test('every local href, src and symbol exists; IDs are unique', async () => {
+  for (const [name, source] of [['index.html',html],['privacy.html',privacy]]) {
+    const ids = [...source.matchAll(/\bid="([^"]+)"/g)].map(match=>match[1]);
+    assert.equal(new Set(ids).size, ids.length, name);
+    for (const match of source.matchAll(/(?:href|src)="([^"]+)"/g)) {
+      const value = match[1];
+      if (value.startsWith('https://')) continue;
+      const [file, anchor] = value.split('#');
+      if (file && file !== './') await access(new URL(file, root));
+      if (file === '' && anchor) assert.ok(ids.includes(anchor), `${name}: ${anchor}`);
+      if (file === 'assets/icons.svg' && anchor) {
+        assert.ok((await readFile(new URL(file,root),'utf8')).includes(`id="${anchor}"`));
+      }
+    }
+  }
+});
+
+test('static images carry alternative text, dimensions and demo attribution', () => {
+  for (const source of [html,privacy]) {
+    for (const match of source.matchAll(/<img\b[^>]*>/g)) {
+      assert.match(match[0], /\balt="[^"]*"/);
+      assert.match(match[0], /\bwidth="\d+"/);
+      assert.match(match[0], /\bheight="\d+"/);
+    }
+  }
+  assert.match(html, /实际运行截图，使用合成演示数据/);
+});
+
+test('existing HTML works as a complete download page with JavaScript disabled', () => {
+  assert.match(html, /<a[^>]+data-apk-link[^>]+https:\/\/gitee\.com/);
+  assert.match(html, /<a[^>]+href="privacy\.html"/);
+  assert.match(html, /<details/);
+  assert.match(html, /Android 7\.0\+/);
+});
+
+test('QR is a local static SVG, not a remote QR-generation tracker', async () => {
+  const qr = await readFile(new URL('assets/download-qr.svg', root),'utf8');
+  assert.match(qr, /<svg/);
+  assert.ok(!qr.includes('<script'));
+  const generator = await readFile(new URL('tools/generate-qr.mjs',root),'utf8');
+  assert.ok(generator.includes("'https://ice-infinite.github.io/'"));
+});
+
+test('future release stamping updates all version fields and preserves disclosure', () => {
+  const next = {...release,versionName:'0.1.23',versionCode:24,sizeBytes:46_000_000,
+    sha256:'a'.repeat(64),publishedAt:'2026-10-20T10:00:00Z',
+    downloadUrl:'https://gitee.com/ice_infinite/anyao-releases/releases/download/v0.1.23-arm64-test.1/anyao-0.1.23-24-arm64-v8a.apk',
+    releaseUrl:'https://gitee.com/ice_infinite/anyao-releases/releases/tag/v0.1.23-arm64-test.1'};
+  const updated = renderRelease(html, release, next);
+  assert.ok(updated.includes(next.downloadUrl));
+  assert.ok(updated.includes(next.sha256));
+  assert.ok(updated.includes('<!-- release:size -->46.00 MB<!-- /release:size -->'));
+  assert.ok(!updated.includes(release.downloadUrl));
+  assert.ok(!updated.includes('<!-- release:version -->0.1.22'));
+  assert.ok(updated.includes('默认开启基础使用统计'));
+});
+
+test('version renderer fails closed for absent markers', () => assert.throws(()=>renderRelease('no markers',release,release)));
+
+for (const [label, patch] of [
+  ['external APK', {downloadUrl:'https://example.com/anyao.apk'}],
+  ['credential in URL', {downloadUrl:release.downloadUrl.replace('https://','https://token@')}],
+  ['HTTP', {downloadUrl:release.downloadUrl.replace('https://','http://')}],
+  ['fragment', {downloadUrl:release.downloadUrl+'#hash'}],
+  ['oversized', {sizeBytes:100_000_001}],
+  ['invalid hash', {sha256:'invalid'}],
+  ['wrong version', {versionName:'../../invalid'}],
+]) test(`release validation rejects ${label}`,()=>assert.throws(()=>validateRelease({...release,...patch})));
+
+test('only reviewed synthetic screenshot files are shipped', async () => {
+  assert.deepEqual((await readdir(new URL('assets/screens/',root))).sort(), ['cabinet-picker.png','entry.png','home.png']);
+});

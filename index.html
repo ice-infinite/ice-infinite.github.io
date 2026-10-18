@@ -1,1 +1,94 @@
-个人网站的内容：暂无
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="安药箱 Android 内测下载。记录家里的药品、存放位置和有效期，不登录也能在本机使用。">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="theme-color" content="#174f40">
+  <meta property="og:title" content="安药箱 · 家里的药，心里有数">
+  <meta property="og:description" content="一款专注家庭药品记录与到期提醒的小工具。Android 内测开放下载。">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ice-infinite.github.io/">
+  <title>安药箱 · 家里的药，心里有数</title>
+  <link rel="canonical" href="https://ice-infinite.github.io/">
+  <link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/site.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="./" aria-label="安药箱首页"><img src="assets/logo.svg" width="38" height="38" alt=""><span>安药箱</span><span class="beta-label">内测中</span></a>
+      <nav aria-label="主导航"><a href="#features">有什么用</a><a href="#screens">看看界面</a><a href="#faq">常见问题</a></nav>
+      <a class="button button-small" href="#download">下载内测版<svg aria-hidden="true"><use href="assets/icons.svg#arrow-down"/></svg></a>
+    </div>
+  </header>
+  <main id="main">
+    <section class="hero container">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="status-dot"></span> 一个替你记住药箱的小工具</p>
+        <h1>家里的药，<br><span>心里有数。</span></h1>
+        <p class="hero-description">还有哪些药，放在了哪里，什么时候到期。<br class="desktop-break">记在安药箱里，用的时候少翻一会儿。</p>
+        <div class="hero-actions"><a class="button" href="#download"><svg aria-hidden="true"><use href="assets/icons.svg#android"/></svg>下载 Android 内测版<svg aria-hidden="true"><use href="assets/icons.svg#arrow-down"/></svg></a><a class="text-link" href="#screens">先看看界面 <span aria-hidden="true">↗</span></a></div>
+        <p class="hero-meta">v<!-- release:version -->0.1.22<!-- /release:version --> · Android 7.0+ / ARM64 · <!-- release:size -->45.23 MB<!-- /release:size --></p>
+        <div class="hero-principles"><span><svg aria-hidden="true"><use href="assets/icons.svg#check"/></svg>不登录也能用</span><span><svg aria-hidden="true"><use href="assets/icons.svg#check"/></svg>基础功能离线可用</span><span><svg aria-hidden="true"><use href="assets/icons.svg#check"/></svg>无需药箱硬件</span></div>
+      </div>
+      <div class="hero-art">
+        <div class="orbit orbit-one" aria-hidden="true"></div><div class="orbit orbit-two" aria-hidden="true"></div>
+        <div class="art-label"><span class="tiny-cross" aria-hidden="true">+</span> 把小事记好，生活少点慌。</div>
+        <div class="phone hero-phone"><img src="assets/screens/home.png" alt="安药箱首页：按到期、临期、待确认和在库分组的库存概览，使用演示数据" width="1080" height="2400" fetchpriority="high"></div>
+        <div class="floating-note"><span class="note-icon"><svg aria-hidden="true"><use href="assets/icons.svg#bell"/></svg></span><span><strong>不用全靠记忆</strong><small>让到期的药，被及时看见</small></span><span class="note-check" aria-hidden="true">✓</span></div>
+        <p class="demo-note">App 实际界面 · 截图为演示数据</p>
+      </div>
+    </section>
+    <section id="features" class="features-section">
+      <div class="container">
+        <div class="section-heading"><p class="eyebrow">不复杂，够用就好</p><h2>把一个小药箱，<br class="mobile-break">理得明明白白。</h2><p>围绕家里的药品，做好几件具体的小事。</p></div>
+        <div class="feature-grid">
+          <article><div class="feature-top"><span class="feature-number">01</span><svg aria-hidden="true"><use href="assets/icons.svg#cabinet"/></svg></div><h3>药放哪儿，不用猜</h3><p>按客厅、卧室，或你自己的房间名字建立药箱。打开一个药箱，就能查看里面记录了哪些药。</p><span class="feature-tag">药箱与存放位置</span></article>
+          <article><div class="feature-top"><span class="feature-number">02</span><svg aria-hidden="true"><use href="assets/icons.svg#calendar"/></svg></div><h3>什么时候到期，记清楚</h3><p>按包装填写有效期，区分已过期和即将到期。开启通知并正确设置提醒后，及时留意需要处理的药品。</p><span class="feature-tag">有效期与本地提醒</span></article>
+          <article><div class="feature-top"><span class="feature-number">03</span><svg aria-hidden="true"><use href="assets/icons.svg#edit"/></svg></div><h3>打开就记，少绕一步</h3><p>填好药名、数量和有效期，选择存放药箱，再保存。暂时不用的规格、批号和备注，收在更多信息里。</p><span class="feature-tag">优先手动录入</span></article>
+        </div>
+        <div class="offline-strip"><svg aria-hidden="true"><use href="assets/icons.svg#shield"/></svg><p><strong>药箱在你手里，数据也有自己的位置。</strong><span>不注册也能使用本机管理；需要同账号多手机同步时，再选择账号云同步。</span></p><a href="privacy.html">看看数据说明 <span aria-hidden="true">↗</span></a></div>
+      </div>
+    </section>
+    <section id="screens" class="screens-section container">
+      <div class="section-heading"><p class="eyebrow">不是概念图，是现在的样子</p><h2>先看明白，再决定下载。</h2><p>这些是 App 实际运行截图，使用合成演示数据，不包含真实用户记录。</p></div>
+      <div class="screens-grid">
+        <figure><a class="phone" href="assets/screens/home.png" target="_blank" rel="noopener" aria-label="打开首页大图"><img src="assets/screens/home.png" width="1080" height="2400" loading="lazy" alt="首页：到期、临期、待确认和在库概览"></a><figcaption><span>01 / 看概览</span><h3>今天该留意什么</h3><p>需要处理的记录，放在前面。</p></figcaption></figure>
+        <figure><a class="phone" href="assets/screens/entry.png" target="_blank" rel="noopener" aria-label="打开录入页大图"><img src="assets/screens/entry.png" width="1080" height="2400" loading="lazy" alt="录入页：药名、有效期、数量、药箱和折叠的更多信息"></a><figcaption><span>02 / 记一盒药</span><h3>重要的内容，直接填</h3><p>支持年月或年月日有效期。</p></figcaption></figure>
+        <figure><a class="phone" href="assets/screens/cabinet-picker.png" target="_blank" rel="noopener" aria-label="打开药箱选择面板大图"><img src="assets/screens/cabinet-picker.png" width="1080" height="2400" loading="lazy" alt="药箱底部选择面板：暂不设置、卧室药箱和客厅药箱，已选择卧室药箱"></a><figcaption><span>03 / 放回药箱</span><h3>存放位置，一选就好</h3><p>选择自己的药箱，也可以暂不设置。</p></figcaption></figure>
+      </div>
+    </section>
+    <section id="download" class="download-section">
+      <div class="container download-layout">
+        <div class="download-copy"><p class="eyebrow">ANDROID · 公开内测</p><h2>让家里的药箱，<br>有个清楚的记录。</h2><p>现在可以下载体验。它还在慢慢完善，<br>欢迎带着真实的日常问题来试一试。</p><div class="qr-row"><img src="assets/download-qr.svg" width="112" height="112" alt="扫码打开 https://ice-infinite.github.io/ 下载页面" loading="lazy"><p>在电脑上浏览？<strong>用手机扫一扫</strong><span>打开此页，下载 Android 安装包</span></p></div><button class="copy-page" type="button" data-copy-page>复制下载页链接 <svg aria-hidden="true"><use href="assets/icons.svg#copy"/></svg></button><p class="copy-status" data-copy-status role="status" aria-live="polite"></p></div>
+        <div class="download-card">
+          <div class="download-card-head"><img src="assets/logo.svg" width="60" height="60" alt=""><div><h3>安药箱</h3><span>Android 内测版</span></div><span class="release-badge">TEST</span></div>
+          <dl class="release-facts"><div><dt>当前版本</dt><dd><!-- release:version -->0.1.22<!-- /release:version --> <small>Build <!-- release:code -->23<!-- /release:code --></small></dd></div><div><dt>安装包大小</dt><dd><!-- release:size -->45.23 MB<!-- /release:size --></dd></div><div><dt>系统要求</dt><dd>Android 7.0+ · ARM64</dd></div><div><dt>更新日期</dt><dd><!-- release:date -->2026-10-19<!-- /release:date --></dd></div></dl>
+          <aside class="test-notice" aria-label="下载前的内测说明"><strong><svg aria-hidden="true"><use href="assets/icons.svg#info"/></svg>下载前，请先了解</strong><p>当前是测试签名的内测包，不是正式版。建议先备份重要数据，不要只依赖 App 判断药品是否适合使用。</p><p>本版本<strong>默认开启基础使用统计</strong>，可在 App「我的 → 隐私与权限 → 使用情况统计」关闭；统计不读取药品正文。<a href="privacy.html">阅读详细说明</a></p></aside>
+          <a class="button download-button" data-apk-link href="https://gitee.com/ice_infinite/anyao-releases/releases/download/v0.1.22-arm64-test.1/anyao-0.1.22-23-arm64-v8a.apk" rel="noopener noreferrer"><svg aria-hidden="true"><use href="assets/icons.svg#arrow-down"/></svg>下载 Android 内测版</a>
+          <p class="download-source">安装包托管于 Gitee · 无需注册本站账号</p>
+          <div class="download-secondary"><a data-release-link href="https://gitee.com/ice_infinite/anyao-releases/releases/tag/v0.1.22-arm64-test.1" target="_blank" rel="noopener noreferrer">打不开下载？前往发行页 ↗</a><a href="#install">安装说明</a></div>
+          <details class="checksum"><summary>查看安装包 SHA-256</summary><code data-sha256><!-- release:sha256 -->56c1456e47785eb1ac304b81e98780fa06a2dc4275c86329fe02d30244cbd76f<!-- /release:sha256 --></code><button type="button" data-copy-hash>复制校验值</button><span role="status" data-hash-status></span></details>
+        </div>
+      </div>
+    </section>
+    <section id="install" class="install-section container"><div class="section-heading"><p class="eyebrow">从下载到使用</p><h2>三步，把药箱记起来。</h2></div><ol class="steps"><li><span>1</span><div><h3>下载并确认安装</h3><p>用 Android 手机打开本页，点击下载。核对来源后，由系统安装器确认；如有风险拦截，请停止安装，不要关闭系统安全保护。</p></div></li><li><span>2</span><div><h3>按实际情况建立药箱</h3><p>在「药箱」里创建一个药箱，填写名称和存放房间。不用买硬件，也不用先注册账号。</p></div></li><li><span>3</span><div><h3>录入药品，设置提醒</h3><p>从底栏「录入」填写药名、数量和包装有效期。如需到期通知，再按 App 提示开启权限并检查提醒状态。</p></div></li></ol><p class="install-tip"><svg aria-hidden="true"><use href="assets/icons.svg#info"/></svg>已经安装过？请直接覆盖更新，不要先卸载。建议先在 App 中备份，并核对更新后的登录、药品和提醒。</p></section>
+    <section id="faq" class="faq-section container"><div class="faq-heading"><p class="eyebrow">可能想问的事</p><h2>先把疑问<br>说清楚。</h2><p>少一些误会，<br>再多一点安心。</p></div><div class="faq-list">
+      <details><summary>哪些手机可以使用？</summary><p>当前提供 Android 7.0 及以上的 ARM64（arm64-v8a）安装包，不支持只有32位系统的手机。目前没有 iPhone/iOS 版本。</p></details>
+      <details><summary>不注册账号，也能用吗？</summary><p>可以。药品录入、药箱管理、查看有效期等基础功能保存在本机，离线也能使用。需要同账号多手机同步时，再选择登录和账号云同步；云端能力需要网络。</p></details>
+      <details><summary>扫码、拍照和语音录入开放了吗？</summary><p>还没有。当前版本优先做好手动录入；扫码、拍照/OCR和语音入口暂时隐藏，待识别和药品查询能力验证完善后再考虑开放。</p></details>
+      <details><summary>提醒一定能收到吗？</summary><p>不能作绝对保证。提醒依赖你填写的有效期、通知权限、提醒设置，以及手机系统的后台与电量管理。请检查 App 的提醒健康状态，并定期查看药箱和实际包装，不要把 App 当作唯一提醒来源。</p></details>
+      <details><summary>需要购买配套硬件吗？</summary><p>不需要。软件可以独立使用，药箱硬件目前还在规划中，尚未完成或销售。网页没有硬件预售或购买入口。</p></details>
+      <details><summary>内测期间会收集哪些使用信息？</summary><p>当前内测包默认开启基础使用统计，提交随机安装标识、使用日期、版本和平台，用于了解安装活跃情况，不关联账号或药品正文。可以随时在 App 内关闭；关闭不影响药品管理。保留时间和云同步边界见<a href="privacy.html">隐私与内测说明</a>。</p></details>
+      <details><summary>下载或安装遇到问题，去哪里反馈？</summary><p>可以到<a href="https://github.com/ice-infinite/ice-infinite.github.io/issues" target="_blank" rel="noopener noreferrer">本站 GitHub Issues</a>反馈。该页面公开，请只说明手机型号、Android/App版本和错误提示，不要提交药品清单、账号资料、密码或验证码。若下载链接打不开，也可使用上方 Gitee 发行页入口。</p></details>
+    </div></section>
+    <section class="closing container"><img src="assets/logo.svg" width="46" height="46" alt=""><p>先把软件做好。<br><strong>让每个小药箱，都有条理一点。</strong></p><a href="#download" class="text-link">去下载体验 <span aria-hidden="true">↗</span></a></section>
+  </main>
+  <footer class="site-footer container"><div><a class="brand" href="./">安药箱</a><p>家庭药品记录与有效期管理小工具</p></div><div class="footer-links"><a href="privacy.html">隐私与内测说明</a><a href="https://gitee.com/ice_infinite/anyao-releases/releases" target="_blank" rel="noopener noreferrer">历史版本 ↗</a><a href="https://github.com/ice-infinite/ice-infinite.github.io/issues" target="_blank" rel="noopener noreferrer">问题反馈 ↗</a></div><p class="footer-note">仅用于家庭库存和标签日期管理，不提供诊断或用药建议，不替代医生、药师或药品说明书。© 2026 安药箱</p></footer>
+</body>
+</html>

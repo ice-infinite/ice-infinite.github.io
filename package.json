@@ -1,0 +1,13 @@
+{
+  "name": "anyao-static-download",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "node tools/preview.mjs",
+    "test": "node --test tests/site.test.mjs",
+    "qa": "node tests/browser.mjs",
+    "sync-release": "node tools/sync-release.mjs"
+  },
+  "devDependencies": { "playwright": "1.64.0", "qrcode": "1.5.4" }
+}
