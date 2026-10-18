@@ -1,10 +1,11 @@
 import { chromium } from 'playwright';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { previewServer } from '../tools/preview.mjs';
 
 const output = new URL('../.qa/',import.meta.url);
+const release = JSON.parse(await readFile(new URL('../assets/release.json',import.meta.url),'utf8'));
 await mkdir(output,{recursive:true});
 const server = await previewServer(0);
 const base = `http://127.0.0.1:${server.address().port}`;
@@ -27,7 +28,7 @@ try {
     })));
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Overflow ${width}`);
     assert.equal(await page.locator('h1').count(),1);
-    assert.ok(await page.locator('[data-apk-link]').getAttribute('href').then(url=>url.includes('anyao-0.1.22-23-arm64-v8a.apk')));
+    assert.equal(await page.locator('[data-apk-link]').getAttribute('href'),release.downloadUrl);
     await page.screenshot({path:fileURLToPath(new URL(`hero-${width}.png`,output))});
     await page.screenshot({path:fileURLToPath(new URL(`home-${width}.png`,output)),fullPage:true});
     await page.locator('.header-inner a[href="#download"]').click();
