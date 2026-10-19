@@ -1,10 +1,10 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { resolve, sep, extname } from 'node:path';
+import { resolve, sep, extname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
-const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.json':'application/json', '.txt':'text/plain', '.xml':'application/xml' };
+const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.json':'application/json', '.txt':'text/plain', '.xml':'application/xml', '.apk':'application/vnd.android.package-archive' };
 
 export function previewServer(port = 4190) {
   const server = createServer(async (request, response) => {
@@ -13,11 +13,13 @@ export function previewServer(port = 4190) {
       const name = pathname === '/' ? 'index.html' : pathname.slice(1);
       const path = resolve(root, name);
       if (!path.startsWith(resolve(root) + sep) ||
-          !(name.startsWith('assets/') || ['index.html','privacy.html','robots.txt','sitemap.xml'].includes(name))) {
+          !(name.startsWith('assets/') || /^downloads\/anyao-\d+\.\d+\.\d+-\d+-arm64-v8a\.apk$/.test(name) || ['index.html','privacy.html','robots.txt','sitemap.xml'].includes(name))) {
         response.writeHead(404).end('Not found'); return;
       }
       const data = await readFile(path);
-      response.writeHead(200, {'Content-Type': types[extname(path)] ?? 'application/octet-stream', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff'}).end(data);
+      const headers = {'Content-Type': types[extname(path)] ?? 'application/octet-stream', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff'};
+      if (extname(path) === '.apk') headers['Content-Disposition'] = `attachment; filename="${basename(path)}"`;
+      response.writeHead(200, headers).end(data);
     } catch { response.writeHead(404).end('Not found'); }
   });
   return new Promise((done, reject) => {

@@ -4,6 +4,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
+import { browserApkName, browserApkPath, stageBrowserApk } from './stage-browser-apk.mjs';
+export { browserApkName, browserApkPath } from './stage-browser-apk.mjs';
 
 export function androidLabel(minSdk) {
   const versions = {21:'5.0',22:'5.1',23:'6.0',24:'7.0',25:'7.1',26:'8.0',27:'8.1',
@@ -42,7 +44,10 @@ export function renderRelease(html, previous, next) {
     if (!expression.test(html)) throw new Error(`Missing HTML release marker: ${key}`);
     html = html.replace(expression, (_, open, close) => open + value + close);
   }
-  return html.replaceAll(previous.downloadUrl, next.downloadUrl).replaceAll(previous.releaseUrl, next.releaseUrl);
+  return html.replaceAll(previous.downloadUrl, next.downloadUrl)
+    .replaceAll(previous.releaseUrl, next.releaseUrl)
+    .replaceAll(browserApkPath(previous), browserApkPath(next))
+    .replaceAll(`download="${browserApkName(previous)}"`, `download="${browserApkName(next)}"`);
 }
 
 const versionParts = value => value.split('.').map(Number);
@@ -75,7 +80,9 @@ export function planRelease(previous, html, input) {
     throw new Error('The same version code cannot refer to different release metadata.');
   }
   const rendered = renderRelease(html, previous, next);
-  if (!rendered.includes(`href="${next.downloadUrl}"`) || !rendered.includes(`href="${next.releaseUrl}"`)) {
+  if (!rendered.includes(`href="${browserApkPath(next)}"`) ||
+      !rendered.includes(`download="${browserApkName(next)}"`) ||
+      !rendered.includes(`data-source-url="${next.downloadUrl}"`) || !rendered.includes(`href="${next.releaseUrl}"`)) {
     throw new Error('Missing actual download or release-page link.');
   }
   return {next, html:rendered, changed:rendered !== html || !same};
@@ -85,6 +92,13 @@ function parseJson(text) { return JSON.parse(text.replace(/^\uFEFF/,'')); }
 
 async function main() {
   const args = process.argv.slice(2);
+  const apkIndex = args.indexOf('--apk');
+  let apkPath;
+  if (apkIndex !== -1) {
+    if (!args[apkIndex + 1] || args[apkIndex + 1].startsWith('--')) throw new Error('Missing APK path.');
+    apkPath = args[apkIndex + 1];
+    args.splice(apkIndex, 2);
+  }
   const root = new URL('../',import.meta.url);
   const previous = parseJson(await readFile(new URL('assets/release.json', root),'utf8'));
   let input, check = false;
@@ -103,12 +117,15 @@ async function main() {
   } else throw new Error('Use --manifest <public stable.json path> or --release-stdin [--check].');
 
   const plan = planRelease(previous, await readFile(new URL('index.html',root),'utf8'), input);
+  const asset = apkPath ? await stageBrowserApk(fileURLToPath(root), previous, plan.next, apkPath, check) :
+    { browserDownloadPath: browserApkPath(plan.next), browserFileChanged: false, removedBrowserPaths: [] };
+  const changed = plan.changed || asset.browserFileChanged;
   if (plan.changed && !check) {
     await writeFile(new URL('index.html',root),plan.html);
     await writeFile(new URL('assets/release.json',root),JSON.stringify(plan.next,null,2)+'\n');
   }
-  console.log(JSON.stringify({status:plan.changed ? (check ? 'would-update':'updated'):'current',
-    changed:plan.changed, versionName:plan.next.versionName, versionCode:plan.next.versionCode,
+  console.log(JSON.stringify({status:changed ? (check ? 'would-update':'updated'):'current',
+    changed, ...asset, versionName:plan.next.versionName, versionCode:plan.next.versionCode,
     sizeBytes:plan.next.sizeBytes, sha256:plan.next.sha256, downloadUrl:plan.next.downloadUrl,
     minSdk:plan.next.minSdk, android:androidLabel(plan.next.minSdk)}));
 }

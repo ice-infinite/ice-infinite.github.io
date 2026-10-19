@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, access, readdir } from 'node:fs/promises';
-import { validateRelease, renderRelease, androidLabel } from '../tools/sync-release.mjs';
+import { createHash } from 'node:crypto';
+import { validateRelease, renderRelease, androidLabel, browserApkPath, browserApkName } from '../tools/sync-release.mjs';
 
 const root = new URL('../', import.meta.url);
 const html = await readFile(new URL('index.html', root), 'utf8');
@@ -14,7 +15,9 @@ test('download exactly matches verified internal-release metadata', () => {
   assert.equal(release.usageStatisticsDefaultEnabled, true);
   assert.ok(Number.isSafeInteger(release.minSdk) && release.minSdk >= 21);
   assert.equal(release.abi, 'arm64-v8a');
-  assert.ok(html.includes(`href="${release.downloadUrl}"`));
+  assert.ok(html.includes(`href="${browserApkPath(release)}"`));
+  assert.ok(html.includes(`download="${browserApkName(release)}"`));
+  assert.ok(html.includes(`data-source-url="${release.downloadUrl}"`));
   assert.ok(html.includes(`href="${release.releaseUrl}"`));
   assert.ok(html.includes(release.sha256));
   assert.ok(html.includes(`<!-- release:code -->${release.versionCode}<!-- /release:code -->`));
@@ -63,7 +66,7 @@ test('static images carry alternative text, dimensions and demo attribution', ()
 });
 
 test('existing HTML works as a complete download page with JavaScript disabled', () => {
-  assert.match(html, /<a[^>]+data-apk-link[^>]+https:\/\/gitee\.com/);
+  assert.match(html, /<a[^>]+data-apk-link[^>]+href="downloads\/[^"/]+\.apk"[^>]+download="[^"/]+\.apk"/);
   assert.match(html, /<a[^>]+href="privacy\.html"/);
   assert.match(html, /<details/);
   assert.ok(html.includes(androidLabel(release.minSdk)));
@@ -108,4 +111,10 @@ for (const [label, patch] of [
 
 test('only reviewed synthetic screenshot files are shipped', async () => {
   assert.deepEqual((await readdir(new URL('assets/screens/',root))).sort(), ['cabinet-picker.png','entry.png','home.png']);
+});
+
+test('same-origin browser APK exactly matches the verified Gitee package', async () => {
+  const bytes = await readFile(new URL(browserApkPath(release), root));
+  assert.equal(bytes.length, release.sizeBytes);
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), release.sha256);
 });

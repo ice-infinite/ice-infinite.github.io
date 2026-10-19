@@ -60,6 +60,7 @@ function fixture(run) {
     const json=JSON.stringify(previous,null,2)+'\n';
     writeFileSync(join(directory,'assets/release.json'),json);
     copyFileSync(new URL('tools/sync-release.mjs',root),join(directory,'tools/sync-release.mjs'));
+    copyFileSync(new URL('tools/stage-browser-apk.mjs',root),join(directory,'tools/stage-browser-apk.mjs'));
     const invoke=(value,args=[])=>spawnSync(process.execPath,[join(directory,'tools/sync-release.mjs'),'--release-stdin',...args],{input:JSON.stringify(value),encoding:'utf8'});
     run({directory,json,invoke});
   } finally {rmSync(directory,{recursive:true,force:true});}

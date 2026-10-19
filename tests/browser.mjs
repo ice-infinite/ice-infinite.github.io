@@ -3,6 +3,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { previewServer } from '../tools/preview.mjs';
+import { browserApkPath, browserApkName } from '../tools/sync-release.mjs';
+import { createHash } from 'node:crypto';
 
 const output = new URL('../.qa/',import.meta.url);
 const release = JSON.parse(await readFile(new URL('../assets/release.json',import.meta.url),'utf8'));
@@ -28,7 +30,8 @@ try {
     })));
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Overflow ${width}`);
     assert.equal(await page.locator('h1').count(),1);
-    assert.equal(await page.locator('[data-apk-link]').getAttribute('href'),release.downloadUrl);
+    assert.equal(await page.locator('[data-apk-link]').getAttribute('href'),browserApkPath(release));
+    assert.equal(await page.locator('[data-apk-link]').getAttribute('download'),browserApkName(release));
     await page.screenshot({path:fileURLToPath(new URL(`hero-${width}.png`,output))});
     await page.screenshot({path:fileURLToPath(new URL(`home-${width}.png`,output)),fullPage:true});
     await page.locator('.header-inner a[href="#download"]').click();
@@ -54,13 +57,26 @@ try {
   const noJs = await browser.newContext({javaScriptEnabled:false});
   const fallback = await noJs.newPage();
   await fallback.goto(base,{waitUntil:'networkidle'});
-  assert.match(await fallback.locator('[data-apk-link]').getAttribute('href'),/^https:\/\/gitee.com/);
+  assert.equal(await fallback.locator('[data-apk-link]').getAttribute('href'),browserApkPath(release));
   assert.ok(await fallback.locator('[data-apk-link]').isEnabled());
   await noJs.close();
+  const mobile = await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,
+    userAgent:'Mozilla/5.0 (Linux; Android 15) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Mobile Safari/537.36',javaScriptEnabled:false});
+  const mobilePage = await mobile.newPage();
+  await mobilePage.goto(base,{waitUntil:'networkidle'});
+  const downloadEvent = mobilePage.waitForEvent('download');
+  await mobilePage.locator('[data-apk-link]').click();
+  const download = await downloadEvent;
+  assert.equal(download.suggestedFilename(),browserApkName(release));
+  const stream = await download.createReadStream();
+  const hash = createHash('sha256'); let bytes = 0;
+  for await (const chunk of stream) {hash.update(chunk);bytes += chunk.length;}
+  assert.equal(bytes,release.sizeBytes);assert.equal(hash.digest('hex'),release.sha256);
+  await mobile.close();
   await page.emulateMedia({reducedMotion:'reduce'});
   assert.equal(await page.evaluate(()=>getComputedStyle(document.documentElement).scrollBehavior),'auto');
   assert.deepEqual(errors,[]); assert.deepEqual(failures,[]); assert.deepEqual(external,[]);
-  const result={status:'passed-local-browser',checks,noJavaScriptDownload:true,reducedMotion:true,browserErrors:errors,failedResources:failures,externalRequests:external,realUserData:false,apkInstalled:false};
+  const result={status:'passed-local-browser',checks,noJavaScriptDownload:true,androidEmulatedApkDownload:true,downloadFilename:browserApkName(release),downloadBytes:release.sizeBytes,reducedMotion:true,browserErrors:errors,failedResources:failures,externalRequests:external,realUserData:false,apkInstalled:false,physicalPhoneTested:false};
   await writeFile(new URL('browser-verification.json',output),JSON.stringify(result,null,2));
   console.log(JSON.stringify(result));
 } finally {await browser.close();await new Promise(done=>server.close(done));}
