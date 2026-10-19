@@ -32,6 +32,20 @@ test('no runtime framework, cloud API, telemetry or external scripts', () => {
   assert.ok(!/https?:\/\/[^"\s]+\.(?:js|css)(?:["\s])/i.test(html));
 });
 
+test('Baidu is an explicit manual mirror, separate from the primary APK and App update URL', () => {
+  const link = html.match(/<a\b[^>]*\bdata-baidu-link\b[^>]*>/)?.[0];
+  assert.ok(link);
+  assert.ok(link.includes('href="https://pan.baidu.com/s/1VgezqwZ6GRLz_LqW5CxHLg?pwd=1234"'));
+  assert.match(link, /target="_blank"/);
+  assert.match(link, /rel="noopener noreferrer"/);
+  assert.ok(!link.includes('download='));
+  assert.ok(!link.includes('data-apk-link'));
+  for (const text of ['GitHub 直接下载 APK', '提取码：<strong>1234</strong>', '版本以文件名为准', 'App 内更新仍通过 Gitee']) assert.ok(html.includes(text), text);
+  assert.ok(privacy.includes('不参与一键发布'));
+  assert.ok(privacy.includes('不会自动连接百度网盘'));
+  assert.ok(!JSON.stringify(release).includes('pan.baidu.com'));
+});
+
 test('honest capabilities, explicit internal collection default and no medical promise', () => {
   for (const text of ['测试签名','不是正式版','默认开启基础使用统计','演示数据','不提供诊断或用药建议','尚未完成或销售','暂时隐藏']) assert.ok(html.includes(text), text);
   for (const text of ['90天','7天','不等于精准使用人数','默认开启','允许基础使用统计','本机','云同步']) assert.ok(privacy.includes(text), text);
@@ -95,6 +109,9 @@ test('future release stamping updates all version fields and preserves disclosur
   assert.ok(!updated.includes(release.downloadUrl));
   assert.ok(!updated.includes(`<!-- release:version -->${release.versionName}<!--`));
   assert.ok(updated.includes('默认开启基础使用统计'));
+  assert.ok(updated.includes('https://pan.baidu.com/s/1VgezqwZ6GRLz_LqW5CxHLg?pwd=1234'));
+  assert.ok(updated.includes('提取码：<strong>1234</strong>'));
+  assert.ok(updated.includes('网盘内容由作者手动维护，版本以文件名为准'));
 });
 
 test('version renderer fails closed for absent markers', () => assert.throws(()=>renderRelease('no markers',release,release)));

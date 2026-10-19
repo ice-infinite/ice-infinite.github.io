@@ -691,6 +691,33 @@ section[id] {
   color:var(--green);
   margin:8px 0
 }
+.download-mirror {
+  margin-top:14px
+}
+.download-mirror-button {
+  width:100%;
+  min-height:48px;
+  font-size:14px;
+  background:transparent;
+  color:var(--green);
+  border:1px solid #c6d8cc
+}
+.download-mirror-button:hover {
+  background:var(--mint)
+}
+.download-mirror p {
+  margin-top:6px;
+  color:var(--muted);
+  text-align:center;
+  font-size:11px
+}
+.download-mirror p+p {
+  margin-top:0
+}
+.download-mirror strong {
+  color:var(--ink);
+  letter-spacing:.08em
+}
 .download-secondary a {
   min-height:38px;
   display:flex;
